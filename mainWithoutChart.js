@@ -2,51 +2,6 @@ var rect = {
     width: 416,
     height: 740
 };
-////
-var myLineChart;
-var chart = [];
-function createChart(chartData = []) {
-    var chartContainer = document.getElementById('chartContainer');
-    chartContainer.innerHTML = '';
-    var chartCanvas = document.createElement('canvas');
-    chartCanvas.style.width = '800';
-    chartContainer.appendChild(chartCanvas);
-    var ctx = chartCanvas.getContext('2d');
-    setTimeout(() => {
-        myLineChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Test',
-                    data: chartData
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                        ticks: {
-                            beginAtZero: true,
-                            suggestedMax: 1,
-                            // suggestedMin: 0
-                        }
-                    }],
-                    yAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                        ticks: {
-                            suggestedMax: 1,
-                            suggestedMin: -1
-                        }
-                    }]
-                }
-            }
-        });
-    }, 1000);
-}
-////
 stage = new createjs.Stage("demoCanvas");
 createjs.Touch.enable(stage);
 var bitmap;
@@ -96,11 +51,15 @@ function mouseUpHandler(event) {
     isDragging = false;
     if (isAnimatable) {
         var difference = event.stageX - positionRelativeToBox;
+        console.log(difference, DELTA);
         if (difference > DELTA) {
             swipeLeft();
         } else if (difference < -DELTA) {
             swipeRight();
         } else if (difference < 1 && difference > -1) {
+            console.log(difference);
+            // bitmap.x = to;
+            // bitmap.setBounds(to, startPosition.y, startPosition.width, startPosition.height);
             stage.update();
         } else {
             goToDefaultPosition();
@@ -151,7 +110,6 @@ function animate(from, to, step) {
             bitmap.setBounds(to, startPosition.y, startPosition.width, startPosition.height);
             stage.update();
             clearInterval(interval);
-            
             isAnimatable = true;
         } else {
             var operation = isDirectionToLeft ? from + step * (1 + currentAnimateTimes) : from - step * (1 + currentAnimateTimes);
@@ -171,31 +129,21 @@ function animateCubicBezier(from, to, time) {
     var x1 = isDirectionToLeft ? to + 100 : to - 100,
         x2 = isDirectionToLeft ? to + 100 : to - 100,
         x3 = isDirectionToLeft ? to - 50 : to + 50;
-        chart = [];
     var interval = setInterval(function() {
         if (currentTime >= time) {
             bitmap.x = to;
             bitmap.setBounds(to, startPosition.y, startPosition.width, startPosition.height);
             stage.update();
             clearInterval(interval);
-            /* chart */
-            chart.push({x: 1, y: to});
-            /* chart */
             isAnimatable = true;
         } else {
             var F_x = cubicBezierForFivePoints(from, x1, x2, x3, to, currentTime/time);
             bitmap.x = F_x;
             bitmap.setBounds(F_x, startPosition.y, startPosition.width, startPosition.height);
-            /* chart */
-            chart.push({x: currentTime/time, y: F_x});
-            /* chart */
             currentTime += step;
             stage.update();
         }
     }, step);
-    /* chart */
-    setTimeout(createChart(chart), 2000);
-    /* chart */
 }
 
 function cubicBezierForFivePoints(x1, x2, x3, x4, x5, time) {
